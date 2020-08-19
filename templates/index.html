@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+
+<!-- ref same distribute https://stackoverflow.com/questions/6865194/fluid-width-with-equally-spaced-divs -->
+<!-- ref read xlsx https://stackoverflow.com/questions/28782074/excel-to-json-javascript-code -->
+
+<head>
+  <title>PillsBox</title>
+
+  <!-- Read xlsx -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/jszip.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/xlsx.js"></script>
+
+  {% load static %}
+
+  <!-- Web icon -->
+  <link rel="icon" href="{% static 'icon.png' %}"/>
+  
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="{% static 'bootstrap.css' %}">
+
+  <!-- Load file -->
+  <script src="{% static 'jquery-3.5.1.js' %}" type="text/javascript"></script>
+
+  <!-- Read CSV -->
+  <script src="{% static 'jquery.csv.js' %}"></script>
+  
+  <!-- Basic image processing -->
+  <script async src="{% static 'opencv.js' %}" type="text/javascript"></script>
+
+  <!-- Detect pills for semi-auto-labelling -->
+  <script src="{% static 'detect.js' %}"></script>
+
+  <!-- Decorations -->
+  <style type="text/css">
+    body {
+      background-color: gainsboro;
+    }
+
+    #page {
+      width: 98%;
+      margin: 20px auto 0;
+      /* background: red; */
+    }
+
+    #container {
+      border: 2px;
+      text-align: justify;
+      -ms-text-justify: distribute-all-lines;
+      text-justify: distribute-all-lines;
+      min-width: 612px;
+    }
+
+    .box {
+      vertical-align: top;
+      display: inline-block;
+      *display: inline;
+      border-radius: 20px;
+      background: whitesmoke;
+    }
+
+    .stretch {
+      width: 100%;
+      display: inline-block;
+      font-size: 0;
+      line-height: 0
+    }
+
+    .b1 {
+      width: 500px;
+      padding: 10px 10px;
+    }
+
+    .right-box {
+      vertical-align: top;
+      display: inline-block;
+      *display: inline;
+    }
+
+    .b3 {
+      width: 250px;
+      padding: 10px 10px;
+      border-radius: 20px;
+      background: whitesmoke;
+    }
+
+    #m1 {
+      text-decoration: underline;
+    }
+
+    .button {
+      width: 250px;
+      height: 60px;
+      padding: 10px 10px;
+      border-radius: 20px;
+      margin: 20px auto 0;
+      /* center button */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* change text properties */
+      color: white;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    #b_detect:hover {
+      background: blue;
+    }
+    #b_detect {
+      background: lightblue;
+    }
+
+    #b_save:hover {
+      background: green;
+    }
+    #b_save {
+      background: lightgreen;
+    }
+
+    #b_clear:hover {
+      background: red;
+    }
+    #b_clear {
+      background: pink;
+    }
+
+    .b4 {
+      width: 100%;
+      height: 220px;
+      padding: 10px 10px;
+    }
+
+    .b_class {
+      width: 150px;
+      height: 150px;
+      margin: 20px auto 0;
+    }
+
+    .b_class:hover {
+      border: 15px solid lightgreen;
+    }
+
+    #s_now0 {
+      border: 15px solid red;
+    }
+
+    .b_slide {
+      width: 267px;
+      height: 200px;
+      object-fit: fill;
+      /* object-fit: cover; */
+    }
+
+    .b_slide:hover {
+      border: 15px solid pink;
+    }
+
+    .b2 {
+      position: relative;
+    }
+
+    #main_image {
+      image-rendering: pixelated;
+      border-radius: 20px;
+      width: 100%;
+      height: 100%;
+    }
+
+    #overlay_cross1 {
+      position: absolute;
+      border-radius: 20px;
+      top: 0%;
+      left: 0%;
+      width: 100%;
+      height: 100%;
+      opacity: 0.5;
+    }
+
+    #overlay_cross2 {
+      position: absolute;
+      border-radius: 20px;
+      top: 0%;
+      left: 0%;
+      width: 100%;
+      height: 100%;
+      opacity: 1;
+    }
+
+    #overlay_draw {
+      position: absolute;
+      border-radius: 20px;
+      top: 0%;
+      left: 0%;
+      width: 100%;
+      height: 100%;
+      opacity: 1;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="page">
+    <div id="container">
+
+      <div class="box b1">
+        <canvas class="box b_class" id="c_1" src="" alt="" onclick="pick_c(this.id)"></canvas>
+        <canvas class="box b_class" id="c_2" src="" alt="" onclick="pick_c(this.id)"></canvas>
+        <canvas class="box b_class" id="c_3" src="" alt="" onclick="pick_c(this.id)"></canvas>
+        <canvas class="box b_class" id="c_4" src="" alt="" onclick="pick_c(this.id)"></canvas>
+        <canvas class="box b_class" id="c_5" src="" alt="" onclick="pick_c(this.id)"></canvas>
+        <canvas class="box b_class" id="c_6" src="" alt="" onclick="pick_c(this.id)"></canvas>
+        <canvas class="box b_class" id="c_7" src="" alt="" onclick="pick_c(this.id)"></canvas>
+        <canvas class="box b_class" id="c_8" src="" alt="" onclick="pick_c(this.id)"></canvas>
+        <canvas class="box b_class" id="c_9" src="" alt="" onclick="pick_c(this.id)"></canvas>
+        <!-- <canvas class="box b_class" id="c_10" src="" alt="" onclick="pick_c(this.id)"></canvas> -->
+        <span class="stretch"></span>
+      </div>
+
+      <div class="box b2" id="container">
+        <img id="main_image" src="" alt="">
+        <canvas id="overlay_cross1"></canvas>
+        <canvas id="overlay_cross2"></canvas>
+        <canvas id="overlay_draw"></canvas>
+      </div>
+
+      <div class="right-box">
+
+        <div class="b3" id="info">
+          <p></p>
+          <p style="font-weight: bold;">Image name :
+          <p id="name">-</p>
+          <p></p>
+          <p style="font-weight: bold;">Image number :
+          <p id="number">- of -</p>
+          <p></p>
+          <p style="font-weight: bold;">Image path :
+          <p id="path">-</p>
+          <p></p>
+          <p style="font-weight: bold;">Mode :
+          <p>- <span id="m1">Box</span></p>
+          <p>- <span id="m2">Watershed</span></p>
+        </div>
+
+        <div class="button" id="b_detect" onclick="detect()">D e t e c t</div>
+        <div class="button" id="b_save" onclick="save()">S a v e</div>
+        <div class="button" id="b_clear" onclick="clear_label()">C l e a r</div>
+
+      </div>
+
+      <span class="stretch"></span>
+    </div>
+
+    <div id="container">
+      <div class="box b4">
+        <img class="box b_slide" id="s_pre3" src="" alt="" onclick="pick_s(this.id)">
+        <img class="box b_slide" id="s_pre2" src="" alt="" onclick="pick_s(this.id)">
+        <img class="box b_slide" id="s_pre1" src="" alt="" onclick="pick_s(this.id)">
+        <img class="box b_slide" id="s_now0" src="" alt="" onclick="pick_s(this.id)">
+        <img class="box b_slide" id="s_nex1" src="" alt="" onclick="pick_s(this.id)">
+        <img class="box b_slide" id="s_nex2" src="" alt="" onclick="pick_s(this.id)">
+        <img class="box b_slide" id="s_nex3" src="" alt="" onclick="pick_s(this.id)">
+        <span class="stretch"></span>
+      </div>
+
+    </div>
+
+  </div>
+
+  <span class="stretch"></span>
+
+  <!-- Get all image files -->
+  <!-- <script type="text/javascript"> var files = {{json_files|safe}}; </script> -->
+
+  <!-- Initiate some value -->
+  <script type="text/javascript">
+    var files = {{json_files|safe}};
+    var image_index = 11
+    var label_data = new Array
+  </script>>
+
+  <!-- Interface and stuffs -->
+  <script src="{% static 'utils.js' %}"></script>
+
+  <!-- Do pill detection in Python -->
+  <script type="text/javascript">
+    function detect(){
+        var image_name = files[image_index]
+        $.ajax({
+            type: "POST",
+            url: '{{ 'detect/' }}',
+            data: { 
+              csrfmiddlewaretoken: '{{ csrf_token }}', 
+              image_name: image_name },  
+            success: function callback(response){
+                      for (box in response['list_of_jsonstuffs']) {
+                        [x1, y1, x2, y2, c] = response['list_of_jsonstuffs'][box]
+                        if (!(files[image_index] in label_data)) {
+                          label_data[files[image_index]] = new Array
+                        }
+                        label_data[files[image_index]].push([x1, y1, x2, y2, Number(c)])
+                      }
+                       update_draw()
+                       box_state = 0
+                    }
+        });
+    }
+  </script>
+
+</body>
+
+</html>
